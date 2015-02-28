@@ -32,7 +32,7 @@ def get_db(db_name):
 
 def get_coll(db_name, coll_name):
     db = get_db(db_name)
-    return client[db][coll_name]
+    return db[coll_name]
 
 def store_object(db_name, coll_name, obj):
     coll = get_coll(db_name, coll_name)

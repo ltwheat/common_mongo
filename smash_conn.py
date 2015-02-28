@@ -1,11 +1,17 @@
 #!/usr/bin/env
 
-import base_conn
+# TODO: This is a band-aid, ultimately should only need to import pymongo in
+#       base_conn (needed for DuplicateKeyError)
+import pymongo
+
+# Not sure why "import base_conn" doesn't work
+from common_mongo import base_conn
 
 # In terms of scaling, the smasher/fighter/stage division will be per database,
 # since, for instance, smash and League info shouldn't be on the same db
 # anyway. But for now, the local database will be them all and we'll divide
 # everything by collections
+
 #smash_db_name = "smash_wii_u"
 smash_db_name = "test_db"
 fgm_coll_name = "for_glory_matches"
@@ -16,8 +22,11 @@ smasher_coll_name = "smashers"
 fighter_coll_name = "fighters"
 stage_coll_name = "stages"
 
+def get_smash_db():
+    return base_conn.get_db(smash_db_name)
+
 def get_all_matches():
-    return base_conn.get_all_coll_objects(smash_db_name, smasher_coll_name)
+    return base_conn.get_all_coll_objects(smash_db_name, fgm_coll_name)
 
 def store_match(match):
     matches = get_all_matches()
@@ -32,20 +41,29 @@ def store_match(match):
                 err_msg = "Match with id {0} already found in " \
                            "collection".format(match_id)
                 raise pymongo.errors.DuplicateKeyError(err_msg)
-        db_match_id = coll.insert(match)
-        print("Stored match of id {0}:".format(match_id))
+        db_match_id = base_conn.store_object(smash_db_name, fgm_coll_name,
+                                             match)
+        print("Stored match of id {0}:".format(db_match_id))
         return db_match_id
     except pymongo.errors.DuplicateKeyError as dke:
         print(dke)
 
-# TODO: Fill out args, return values
-def get_smasher():
-    pass
+def get_smasher_coll():
+    smash_db = get_smash_db()
+    return smash_db[smasher_coll_name]
+
+def get_smasher(smasher_dict):
+    return get_smasher_coll().find_one(smasher_dict)
 
 def get_all_smashers():
-    coll = base_conn.get_coll(smash_db_name, smasher_coll_name)
-    return coll.find()
+    smashers = base_conn.get_all_coll_objects(smash_db_name, smasher_coll_name)
+    return smashers
 
 def store_smasher(smasher):
-    smashers = get_all_smashers()
-    return base_conn.store_object(smash_db_name, smasher_coll_name, smasher)
+    smasher_dict = smasher.convert_to_dict()
+    if smasher.tag == '':
+        raise AttributeError("Can't store Smasher with no tag")
+    elif smasher.smasher_id < 0:
+        raise AttributeError("Can't store Smasher with no id")
+    return base_conn.store_object(smash_db_name, smasher_coll_name,
+                                  smasher_dict)
