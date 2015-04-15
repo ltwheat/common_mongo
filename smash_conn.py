@@ -12,8 +12,8 @@ from common_mongo import base_conn
 # anyway. But for now, the local database will be them all and we'll divide
 # everything by collections
 
-#smash_db_name = "smash_wii_u"
-smash_db_name = "test_db"
+smash_db_name = "smash_wii_u"
+#smash_db_name = "test_db"
 fgm_coll_name = "for_glory_matches"
 smasher_coll_name = "smashers"
 # Constants are probably good enough for these, at least for now, since there
@@ -43,7 +43,7 @@ def store_match(match):
                 raise pymongo.errors.DuplicateKeyError(err_msg)
         db_match_id = base_conn.store_object(smash_db_name, fgm_coll_name,
                                              match)
-        print("Stored match of id {0}:".format(db_match_id))
+        print("\nStored match of id {0}:".format(db_match_id))
         return db_match_id
     except pymongo.errors.DuplicateKeyError as dke:
         print(dke)
