@@ -26,7 +26,7 @@ def get_smash_db():
     return base_conn.get_db(smash_db_name)
 
 def get_all_matches():
-    return base_conn.get_all_coll_objects(smash_db_name, fgm_coll_name)
+    return list(base_conn.get_all_coll_objects(smash_db_name, fgm_coll_name))
 
 def store_match(match):
     matches = get_all_matches()
@@ -57,7 +57,7 @@ def get_smasher(smasher_dict):
 
 def get_all_smashers():
     smashers = base_conn.get_all_coll_objects(smash_db_name, smasher_coll_name)
-    return smashers
+    return list(smashers)
 
 def store_smasher(smasher):
     smasher_dict = smasher.convert_to_dict()
