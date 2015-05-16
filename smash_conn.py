@@ -22,11 +22,19 @@ smasher_coll_name = "smashers"
 fighter_coll_name = "fighters"
 stage_coll_name = "stages"
 
+# Returns the Smash database
 def get_smash_db():
     return base_conn.get_db(smash_db_name)
 
-def get_all_matches():
-    return list(base_conn.get_all_coll_objects(smash_db_name, fgm_coll_name))
+# Returns all stored matches given the specified collection name. Raises
+# KeyError if collection is empty.
+def get_all_matches(match_type="for_glory"):
+    coll_name = "{0}_matches".format(match_type)
+    matches = list(base_conn.get_all_coll_objects(smash_db_name, coll_name))
+    if len(matches) < 1:
+        raise KeyError("Collection {0} in database ".format(coll_name) +
+                       "{0} is empty.".format(smash_db_name))
+    return matches
 
 def store_match(match):
     matches = get_all_matches()
@@ -48,10 +56,12 @@ def store_match(match):
     except pymongo.errors.DuplicateKeyError as dke:
         print(dke)
 
+# Returns the collection of Smashers
 def get_smasher_coll():
     smash_db = get_smash_db()
     return smash_db[smasher_coll_name]
 
+# Returns a stored smasher, given a serialized Smasher
 def get_smasher(smasher_dict):
     return get_smasher_coll().find_one(smasher_dict)
 
