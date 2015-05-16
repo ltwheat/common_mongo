@@ -36,6 +36,16 @@ def get_all_matches(match_type="for_glory"):
                        "{0} is empty.".format(smash_db_name))
     return matches
 
+def get_matches_by_smasher(smasher, match_type="for_glory"):
+    all_matches = get_all_matches(match_type)
+    smasher_dict = smasher.convert_to_dict()
+    smasher_matches = []
+    for match in all_matches:
+        if match['player1']['smasher'] == smasher_dict or \
+                match['player2']['smasher'] == smasher_dict:
+            smasher_matches.append(match)
+    return smasher_matches
+
 def store_match(match):
     matches = get_all_matches()
     # TODO: This check loops through every match in the db but I feel like
